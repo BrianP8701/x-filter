@@ -3,9 +3,8 @@ from x_filter.data import Database
 
 db = Database()
 
-# db.create_tables(['users'])
 
-db.create_tables(['users', 'filters'])
+# db.create_tables(['users', 'filters', 'conversations', 'events'])
 
 
 # db.clear_table('conversations', 'CONFIRM')

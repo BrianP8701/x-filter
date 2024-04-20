@@ -1,0 +1,57 @@
+
+
+User:
+hello
+
+Bot:
+Hello! I am X-Filter, a bot designed to assist users in finding specific content on X (Twitter). Can you tell me what you are looking for? Are you looking for users, tweets or reports (a summary of a collection of tweets)?
+
+User:
+reports
+
+Bot:
+Great! Now that we've established the target, could you explain to me what type of tweets you're looking for? Be as specific as possible. Are there any specific topics, events, or ideas you're looking for?
+
+User:
+Im specifically looking for tweets that deliver insights into new methods in RAG, that solve new problems. Specific problems im interested include new methods for chunking in RAG, the best state of the art vector databases and models specifically finetuned for RAG. I'm also particularly interested in new methods where we dont just use vector similarity but use metadata, or descriptions and an LLM to navigate sections, a folder structure or tree. Id be particularly fascinated to see someone working on a system that takes an arbitrary data, and organizes it into a file structure autonomously, labeling folders with descripitons organizing it etc, and then to be able to have an LLM search it. 
+
+
+Bot:
+If you like this prompt and are ready to move on, say 'yes'. Otherwise tell me what to change or improve:
+Search for tweets that provide insights into new methods in Retrieval-Augmented Generation (RAG) that address specific problems. Focus on tweets discussing: 1) New techniques for chunking in RAG, 2) The latest state-of-the-art vector databases, 3) Models that are specifically fine-tuned for RAG. Additionally, look for tweets about innovative methods that go beyond vector similarity, such as using metadata, descriptions, and a Language Model (LLM) to navigate through sections, folders, or a tree structure. Include tweets about research or projects where a system autonomously organizes arbitrary data into a file structure, labels folders with descriptions, and allows an LLM to search through it.
+
+User:
+yes
+
+Bot:
+Now that we've pinpointed the main focus of your search, it's time to fine-tune it with some additional filters. You're not required to specify everything—just share what matters most to you:
+
+- How often would you like this filter to run? The default setting is weekly, but we can adjust this based on your preference.
+- How many tweets/users would you like to see in each report? We can set a maximum number of tweets/users to display.
+- Are there specific usernames (@username) you're interested in? Do you want to limit your search to these users, or do you want us to find other users as well? You may also choose to limit the search to people you follow.
+- Are there any keywords or specific combinations of keywords you think will be useful to search by? We will generate a combinations of keywords to search, but if you have any specific ones you want to mention, please do so.
+
+User:
+I want tweets that are from the last week only. Max 20 tweets. thats all
+
+
+Bot:
+If you are satisfied with these filters, say 'yes'. Otherwise tell me what to change or improve:
+Filter for tweets from the last week with a maximum of 20 tweets per report.
+
+User:
+yes
+
+Bot:
+Fantastic! We're now transitioning to the report creation phase. Based on the primary prompt we've crafted together, we'll prepare individual reports for each tweet that aligns with your specified criteria. Please specify the format you prefer for these reports (e.g., text, PDF, spreadsheet). For example, you can tell us what level of detail you expect in each report - do you prefer a concise summary, a detailed analysis, or something in-between? Are there any specific insights or types of analysis you're particularly interested in for each tweet? What tone do you prefer for the reports - formal, informal, technical, or something else? Lastly, are you interested in an analytical perspective of the tweets, or would a straightforward listing of facts, insights, and ideas suffice? Feel free to provide any additional information or preferences you have regarding the report guide.
+
+User:
+Id like concise reports in text format for each tweet. I would like the reports to include a concise and technical overview of any new methods, insights, or findings related to RAG. 
+
+
+Bot:
+If you like this report guide and are ready to move on, say 'yes'. Otherwise tell me what to change or improve:
+For each tweet, provide a concise report in text format. The report should include a technical overview of any new methods, insights, or findings related to RAG (Recombinant Antibody Generations).
+
+User:
+yes

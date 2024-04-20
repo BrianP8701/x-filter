@@ -25,19 +25,18 @@ class ExtractedFilters(BaseModel): # We build this based off of the filter_promp
 class Filter (BaseModel):
     id: str
     user_id: str
-    name: Optional[str] = None
-    target: Optional[FilterTarget] = None
-    primary_prompt: Optional[str] = None
-    report_guide: Optional[str] = None
-    filter_prompt: Optional[str] = None
+    name: str
+    target: FilterTarget = FilterTarget.TWEETS
+    primary_prompt: str = ""
+    report_guide: str = ""
+    filter_prompt: str = ""
 
-    filter_period: Optional[int] = 7 # In days
-    usernames: Optional[List[str]] = [] # Specific usernames to search for
-    only_search_specified_usernames: Optional[bool] = False
-    # only_search_followers: Optional[bool] = False
-    tweet_cap: Optional[int] = 100
-    user_cap: Optional[int] = 20
-    keyword_groups: Optional[List[List[str]]] = None
-    messages: Optional[List[Dict[str, str]]] = []
+    filter_period: int = 7 # In days
+    usernames: List[str] = [] # Specific usernames to search for
+    only_search_specified_usernames: bool = False
+    only_search_followers: bool = False
+    report_cap: int = 100
+    keyword_groups: List[List[str]] = []
+    messages: List[Dict[str, str]] = []
 
     model_config = ConfigDict(use_enum_values=True)

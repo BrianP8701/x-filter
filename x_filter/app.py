@@ -12,7 +12,8 @@ from x_filter import Database
 from x_filter.x.wrapper import XWrapper
 from x_filter.api.run_filter import router as run_filter_router, process_events
 from x_filter.api.authentication import router as authentication_router
-
+from x_filter.api.filter_settings import router as filter_settings_router
+from x_filter.api.receive_event import router as receive_event_router
 
 logging.basicConfig(filename='tests/logs.txt', filemode='a', format='\n\n%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
@@ -31,6 +32,8 @@ app = FastAPI(lifespan=lifespan) # FastAPI app handles events
 
 app.include_router(run_filter_router)
 app.include_router(authentication_router)
+app.include_router(filter_settings_router)
+app.include_router(receive_event_router)
 
 app.add_middleware(
     CORSMiddleware,

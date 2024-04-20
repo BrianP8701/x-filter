@@ -1,4 +1,4 @@
-# x_filter/auth_router.py
+# x_filter/api/authentication.py
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
@@ -6,6 +6,9 @@ from x_filter import Database
 from x_filter.data.models.user import User
 from x_filter.utils.security import authenticate
 from x_filter.utils.security import check_password, generate_tokens, hash_password
+from x_filter.data.models.filter import Filter
+from x_filter.data.models.conversation import Conversation
+from x_filter.utils.conversational import initialize_filter_chat
 
 router = APIRouter()
 db = Database()
@@ -14,6 +17,7 @@ class User(BaseModel):
     id: str
     password: str
     x_username: str
+
 @router.post("/api/signup/")
 def signup(user: User):
     if db.exists("users", user.id):
@@ -24,11 +28,14 @@ def signup(user: User):
 
     access_token, refresh_token = generate_tokens(user.id)
 
+    initialize_filter_chat(user.id)
+
     return {
         "access_token": access_token, 
         "refresh_token": refresh_token, 
         "user": user
     }
+
 class SigninUser(BaseModel):
     id: str
     password: str

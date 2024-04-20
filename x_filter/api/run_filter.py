@@ -1,4 +1,4 @@
-# x_filter/run_filter.py
+# x_filter/api/run_filter.py
 from fastapi import APIRouter
 import asyncio
 from pydantic import BaseModel
@@ -15,7 +15,7 @@ class RunFilterParams(BaseModel):
     filter_id: str
     
 @router.post("/run-filter/")
-async def add_event(data: RunFilterParams):
+async def run_filter(data: RunFilterParams):
     await event_queue.put(data.filter_id)
     return {"message": "Event added to the queue"}
 
