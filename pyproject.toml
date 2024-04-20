@@ -9,7 +9,8 @@ readme = "README.md"
 python = "^3.10"
 openai = "^1.23.2"
 pydantic = "^2.7.0"
-mkdocs = "^1.6.0"
+instructor = "^1.2.2"
+tweepy = "^4.14.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
