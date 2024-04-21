@@ -37,6 +37,8 @@ async def handle_chat_message(user_id: str, message: str):
     filter = Filter(**db.query("filters", user_id))
     event = MessageEvent(user_id=user_id, filter_id=user_id, message=message)
     logging.info(f"Received event in the handler")
+    conversation.cached_messages.append({"role": "user", "content": message})
+    db.update("conversations", conversation.model_dump())
 
     match int(conversation.stage):
         case 1:
@@ -122,7 +124,7 @@ async def build_filter_prompt(conversation: Conversation, event: MessageEvent, f
     logging.info(f"Received event in the build_filter_prompt function")
     user_message = event.message
     if user_message.lower().replace(" ", "") == "yes": # User is satisfied with the filter prompt
-        if filter.target is 'reports':
+        if filter.target == 'reports':
             conversation.stage = 4
             conversation.cached_messages = []
             db.update("conversations", conversation.model_dump())
@@ -227,6 +229,10 @@ async def build_filter(filter: Filter): # Extract filters from the prompts
     
     db.update("filters", filter.model_dump())
 
+    user_message = filter.primary_prompt
+    if filter.keyword_groups:
+        user_message += f"\n\nThe user shared these example keywords with us: {filter.keyword_groups}"
+
     messages = [
         {
             "role": "system",
@@ -234,7 +240,7 @@ async def build_filter(filter: Filter): # Extract filters from the prompts
         },
         {
             "role": "user",
-            "content": filter.primary_prompt
+            "content": user_message
         }
     ]
 
@@ -242,4 +248,4 @@ async def build_filter(filter: Filter): # Extract filters from the prompts
     filter.keyword_groups = combine_keyword_groups(filter.keyword_groups, model.keyword_groups)
     db.update("filters", filter.model_dump())
 
-    await run_x_filter(filter.id, first_cap=30)
+    await run_x_filter(filter.id)

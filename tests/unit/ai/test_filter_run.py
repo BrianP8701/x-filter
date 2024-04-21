@@ -28,7 +28,7 @@ db = Database()
 #     db.delete("filters", temporary_filter.model_dump())
 
 try:
-    results = asyncio.run(run_x_filter('47367242-65ad-4839-aa68-5c7399007466', first_cap=30))
+    results = asyncio.run(run_x_filter('45aefae8-ad99-4345-ba93-138dd7e9cb12'))
 except Exception as e:
     import traceback
     print(f"Error: {e}")

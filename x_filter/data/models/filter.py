@@ -35,6 +35,7 @@ class Filter (BaseModel):
     only_search_specified_usernames: bool = False
     only_search_followers: bool = False
     return_cap: int = 20
+    return_min: int = 5
     keyword_groups: List[List[str]] = []
     messages: List[Dict[str, str]] = []
 

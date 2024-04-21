@@ -12,6 +12,11 @@ db = Database()
 async def generate_keyword_groups(filter: Filter): # Extract filters from the prompts
     logging.info(f"filter: {filter}")
     filter = Filter(**filter)
+    
+    user_message = filter.primary_prompt
+    if filter.keyword_groups:
+        user_message += f"\n\nThe user shared these example keywords with us: {filter.keyword_groups}"
+
     messages = [
         {
             "role": "system",
@@ -19,7 +24,7 @@ async def generate_keyword_groups(filter: Filter): # Extract filters from the pr
         },
         {
             "role": "user",
-            "content": filter.primary_prompt
+            "content": user_message
         }
     ]
 
@@ -27,4 +32,4 @@ async def generate_keyword_groups(filter: Filter): # Extract filters from the pr
     filter.keyword_groups = combine_keyword_groups(filter.keyword_groups, model.keyword_groups)
     db.update("filters", filter.model_dump())
 
-    await run_x_filter(filter.id, first_cap=30)
+    await run_x_filter(filter.id)

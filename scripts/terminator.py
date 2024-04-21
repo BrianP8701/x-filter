@@ -89,4 +89,4 @@ async def ai_terminate_bot(user_id: str, tweets_data: List[Dict]) -> Dict[str, b
 
 # At the end of your script, replace the direct call with:
 if __name__ == "__main__":
-    asyncio.run(terminate_bots("BrianPrzezdzie2"))
+    asyncio.run(terminate_bots("PhuongRust"))

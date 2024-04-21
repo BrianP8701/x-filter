@@ -65,7 +65,7 @@ class Stage3(BaseModel):
 ask_for_filter_prompt = """Now that we've pinpointed the main focus of your search, it's time to fine-tune it with some additional filters. You're not required to specify everything—just share what matters most to you:
 
 - How often would you like this filter to run? The default setting is weekly, but we can adjust this based on your preference.
-- How many tweets/users would you like to see in each report? We can set a maximum number of tweets/users to display.
+- Minimum and maximum tweets/users would you like to see in each report?
 - Are there specific usernames (@username) you're interested in? Do you want to limit your search to these users, or do you want us to find other users as well? You may also choose to limit the search to people you follow.
 - Are there any keywords or specific combinations of keywords you think will be useful to search by? We will generate a combinations of keywords to search, but if you have any specific ones you want to mention, please do so."""
 
@@ -76,7 +76,7 @@ class Stage3(BaseModel):
     def __str__(self):
         return f"filter_prompt: {self.filter_prompt}\nquestions: {self.questions}"
 
-stage3_system_prompt = """At this stage we are building a filter prompt. The user can tell us how often they want the filter to run, the maximum number of tweets/users they want to see in each report, specific usernames they are interested in and if they want to limit the search to those they specified, or if they want to limit the search to people they follow, or if they are okay with us finding new users.  Also did they mention any specific keywords they want us to search for? If so, write them that in the 'filter_prompt' field as well. Try to include everything the user talked about and wanted in this prompt. The user might ask you to change it, so be ready to make adjustments. If the user doesn't want any filters, just fill out the 'filter_prompt' field with 'No specific filters in mind'. The user doesen't have to fill out any of these, but if they make something very unclear choose to ask questions."""
+stage3_system_prompt = """At this stage we are building a filter prompt. The user can tell us how often they want the filter to run, the minimum and maximum number of tweets/users they want to see in each report, specific usernames they are interested in and if they want to limit the search to those they specified, or if they want to limit the search to people they follow, or if they are okay with us finding new users.  Also did they mention any specific keywords they want us to search for? If so, write them that in the 'filter_prompt' field as well. Try to include everything the user talked about and wanted in this prompt. The user might ask you to change it, so be ready to make adjustments. If the user doesn't want any filters, just fill out the 'filter_prompt' field with 'No specific filters in mind'. The user doesen't have to fill out any of these, but if they make something very unclear choose to ask questions."""
 
 ask_for_report_guide = """Fantastic! We're now transitioning to the report creation phase. Based on the primary prompt we've crafted together, we'll prepare individual reports for each tweet that aligns with your specified criteria. For example, you can tell us what level of detail you expect in each report - do you prefer a concise summary, a detailed analysis, or something in-between? Are there any specific insights or types of analysis you're particularly interested in for each tweet? What tone do you prefer for the reports - formal, informal, technical, or something else? Lastly, are you interested in an analytical perspective of the tweets, or would a straightforward listing of facts, insights, and ideas suffice? Feel free to provide any additional information or preferences you have regarding the report guide."""
 
@@ -111,6 +111,7 @@ class ExtractedFilters(BaseModel):
     usernames: Optional[List[str]] = Field(None, description="Did the user mention any specific usernames to search for?")
     only_search_specified_usernames: Optional[bool] = Field(None, description="Did the user ask to only search for the specific usernames they mentioned?")
     only_search_followers: Optional[bool] = Field(None, description="Did the user ask to only search for the people they follow?")
+    return_min: Optional[int] = Field(None, description="Did the user ask for a minimum number of tweets/users to return? If so fill in this field")
     return_cap: Optional[int] = Field(None, description="Did the user ask to limit the number of tweets/users they want to see in each report? If so fill in this field.")
     keyword_groups: Optional[List[List[str]]] = Field(None, description="Did the user provide any keyword groups to search for?")
     

@@ -9,7 +9,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from x_filter import Database
-from x_filter.x.wrapper import XWrapper
 from x_filter.api.run_filter import router as run_filter_router, process_events
 from x_filter.api.authentication import router as authentication_router
 from x_filter.api.filter_settings import router as filter_settings_router
@@ -46,7 +45,6 @@ app.add_middleware(
 )
 
 db = Database() # Database follows the abstract base class to easily scale or switch databases. Rn we use SQLite locally
-x_wrapper = XWrapper()
 
 # Custom exception handler for RequestValidationError
 @app.exception_handler(RequestValidationError)

@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import List, Dict, Optional
+import logging
 
 from x_filter import Database
 from x_filter.data.models.filter import FilterTarget
@@ -37,5 +38,6 @@ class UpdateFilterParams(BaseModel):
     filter: Dict
 @router.post("/api/update_filter/")
 async def update_filter(data: UpdateFilterParams):
+    logging.info(f"filter: {data.filter}")
     db.update("filters", data.filter)
     await generate_keyword_groups(data.filter)

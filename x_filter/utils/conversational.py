@@ -31,6 +31,7 @@ def add_message_to_conversation(conversation: Conversation, role: str, content: 
         "content": content
     }
     conversation.messages.append(new_message)
+    conversation.cached_messages.append(new_message)
     db.update("conversations", conversation.model_dump())
 
 def clear_cached_conversation_messages(conversation: Conversation):
