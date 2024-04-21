@@ -92,10 +92,6 @@ class XWrapper:
             "query": self.build_combined_query(filter.keyword_groups)
         }
 
-        if filter.expansions:
-            params["expansions"] = ",".join(filter.expansions)
-        if filter.sort_order:
-            params["sort_order"] = filter.sort_order
         if filter.start_time:
             params["start_time"] = filter.start_time
         if filter.tweet_fields:

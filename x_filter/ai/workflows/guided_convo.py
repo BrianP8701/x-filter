@@ -39,20 +39,20 @@ ask_for_primary_prompt_for_users = """Great! Now that we've established the targ
 ask_for_primary_prompt_for_tweets = """Great! Now that we've established the target, could you explain to me what type of tweets you're looking for? Be as specific as possible. Are there any specific topics, events, or ideas you're looking for?"""
 
 # We go back and forth with the user to build the primary prompt
-class Stage1_1(BaseModel):
+class Stage2(BaseModel):
     rewritten_primary_prompt: Optional[str]
     questions: Optional[str]
     
     def __str__(self):
         return f"rewritten_primary_prompt: {self.rewritten_primary_prompt}\nquestions: {self.questions}"
 
-stage1_1_system_prompt = """At this stage we want to build a comprehensive "primary prompt" describing what the user wants. Choose one of the following options:
+stage2_system_prompt = """At this stage we want to build a comprehensive "primary prompt" describing what the user wants. Choose one of the following options:
 
 1. **Clarify the Search**: If the user's request is unclear, ask questions in the 'questions' field to better understand what they want. If there's acronyms or things that you don't aren't familiar about ask them detailed questions about it. Record these questions in the 'questions' field. Skip this step if the user's intent is already clear. If the user wants reports, clarify that at this stage we're only talking about what types of tweets you want to search for.
 
 2. **Write the Primary Prompt**: If you don't have any further questions to ask, write the primary prompt in the 'rewritten_primary_prompt' field. Try to include everything the user talked about and wanted in this prompt. It's crucial that this is as comprehensive as humanlly possible."""
 
-class Stage1_2(BaseModel):
+class Stage3(BaseModel):
     additional_filters: Optional[str]
     questions: Optional[str]
 
@@ -66,25 +66,25 @@ ask_for_filter_prompt = """Now that we've pinpointed the main focus of your sear
 - Are there specific usernames (@username) you're interested in? Do you want to limit your search to these users, or do you want us to find other users as well? You may also choose to limit the search to people you follow.
 - Are there any keywords or specific combinations of keywords you think will be useful to search by? We will generate a combinations of keywords to search, but if you have any specific ones you want to mention, please do so."""
 
-class Stage1_2(BaseModel):
+class Stage3(BaseModel):
     filter_prompt: Optional[str]
     questions: Optional[str]
 
     def __str__(self):
         return f"filter_prompt: {self.filter_prompt}\nquestions: {self.questions}"
 
-stage1_2_system_prompt = """At this stage we are building a filter prompt. The user can tell us how often they want the filter to run, the maximum number of tweets/users they want to see in each report, specific usernames they are interested in and if they want to limit the search to those they specified, or if they want to limit the search to people they follow, or if they are okay with us finding new users.  Also did they mention any specific keywords they want us to search for? If so, write them that in the 'filter_prompt' field as well. Try to include everything the user talked about and wanted in this prompt. The user might ask you to change it, so be ready to make adjustments. If the user doesn't want any filters, just fill out the 'filter_prompt' field with 'No specific filters in mind'. The user doesen't have to fill out any of these, but if they make something very unclear choose to ask questions."""
+stage3_system_prompt = """At this stage we are building a filter prompt. The user can tell us how often they want the filter to run, the maximum number of tweets/users they want to see in each report, specific usernames they are interested in and if they want to limit the search to those they specified, or if they want to limit the search to people they follow, or if they are okay with us finding new users.  Also did they mention any specific keywords they want us to search for? If so, write them that in the 'filter_prompt' field as well. Try to include everything the user talked about and wanted in this prompt. The user might ask you to change it, so be ready to make adjustments. If the user doesn't want any filters, just fill out the 'filter_prompt' field with 'No specific filters in mind'. The user doesen't have to fill out any of these, but if they make something very unclear choose to ask questions."""
 
 ask_for_report_guide = """Fantastic! We're now transitioning to the report creation phase. Based on the primary prompt we've crafted together, we'll prepare individual reports for each tweet that aligns with your specified criteria. Please specify the format you prefer for these reports (e.g., text, PDF, spreadsheet). For example, you can tell us what level of detail you expect in each report - do you prefer a concise summary, a detailed analysis, or something in-between? Are there any specific insights or types of analysis you're particularly interested in for each tweet? What tone do you prefer for the reports - formal, informal, technical, or something else? Lastly, are you interested in an analytical perspective of the tweets, or would a straightforward listing of facts, insights, and ideas suffice? Feel free to provide any additional information or preferences you have regarding the report guide."""
 
-class Stage1_3(BaseModel):
+class Stage4(BaseModel):
     report_guide: Optional[str]
     questions: Optional[str]
     
     def __str__(self):
         return f"report_guide: {self.report_guide}\nquestions: {self.questions}"
 
-stage1_3_system_prompt = """At this stage we want to build a comprehensive "report guide" describing how we will write the report. To give some context, we'll have a collection of tweets and we want to know how the user wants the report to be written. If you need to further clarify details about the report guide, ask questions in the 'questions' field. Otherwise, write the report guide in the 'report_guide' field. Try to include everything the user talked about and wanted in this guide. The user might ask you to change it, so be ready to make adjustments."""
+stage4_system_prompt = """At this stage we want to build a comprehensive "report guide" describing how we will write the report. To give some context, we'll have a collection of tweets and we want to know how the user wants the report to be written. If you need to further clarify details about the report guide, ask questions in the 'questions' field. Otherwise, write the report guide in the 'report_guide' field. Try to include everything the user talked about and wanted in this guide. The user might ask you to change it, so be ready to make adjustments."""
 
 ask_for_user_report_guide = """Fantastic! Now do you want us to generate reports on each user we find? If so, please specify the format you prefer for these reports (e.g., text, PDF, spreadsheet). What level of detail do you expect in each report - do you prefer a concise summary, a detailed analysis, or something in-between? Are there any specific insights or types of analysis you're particularly interested in for each user? What tone do you prefer for the reports - formal, informal, technical, or something else? Lastly, are you interested in an analytical perspective of the users, or would a straightforward listing of facts, insights, and ideas suffice? Feel free to provide any additional information or preferences you have regarding the report guide."""
 

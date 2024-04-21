@@ -4,7 +4,7 @@ import logging
 
 from x_filter import Database
 from x_filter.data.models.events import MessageEvent
-from x_filter.ai.main import handle_user_message
+from x_filter.ai.chat import handle_user_message
 from x_filter.data.models.conversation import Conversation
 from x_filter.data.models.filter import Filter
 

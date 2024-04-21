@@ -1,6 +1,6 @@
 # x_filter/app.py
 # uvicorn x_filter.app:app --reload
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
@@ -14,6 +14,7 @@ from x_filter.api.run_filter import router as run_filter_router, process_events
 from x_filter.api.authentication import router as authentication_router
 from x_filter.api.filter_settings import router as filter_settings_router
 from x_filter.api.receive_event import router as receive_event_router
+from x_filter.websocket import WebsocketManager
 
 logging.basicConfig(filename='tests/logs.txt', filemode='a', format='\n\n%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
@@ -29,6 +30,7 @@ async def lifespan(app: FastAPI):
     db.dispose_instance()
 
 app = FastAPI(lifespan=lifespan) # FastAPI app handles events
+manager = WebsocketManager()
 
 app.include_router(run_filter_router)
 app.include_router(authentication_router)
@@ -56,3 +58,18 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=422,
         content={"detail": exc.errors(), "body": await request.json()},
     )
+
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await websocket.accept()
+    while True:
+        try:
+            data = await websocket.receive_text()
+            # You can now handle incoming messages here
+            # This can be used to send messages back to the client or handle received data
+            await websocket.send_text(f"Message received: {data}")
+        except Exception as e:
+            # Handle disconnection or errors here
+            print(f"Error: {e}")
+            break
+    await websocket.close()
