@@ -5,6 +5,7 @@ import requests
 import os
 from typing import List, Optional
 from dotenv import load_dotenv
+import tweepy
 
 from x_filter.data.models.filter import Filter
 from x_filter.x.helpers import create_url_tweets, create_url_users, build_combined_query
@@ -207,3 +208,4 @@ class XWrapper:
         response = requests.request("POST", url, auth=bearer_oauth, params=params)
         return response.json()
     # Learn more abt x's api and implement more methods as needed
+    

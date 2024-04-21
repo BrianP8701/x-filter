@@ -1,0 +1,62 @@
+site_name: x-filter docs
+site_author: Brian Przezdziecki
+site_description: generate reports based on very specific criteria or find people with highly specific sets of skills and beliefs
+repo_name: x-filter
+repo_url: https://github.com/BrianP8701/x-filter/
+site_url: https://BrianP8701.github.io/x-filter/
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2024 Brian Przezdziecki
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.expand
+    - navigation.prune
+    - navigation.indexes
+  palette:
+    - scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  font:
+    text: Roboto
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Introduction: getting_started/index.md
+      - Organization: getting_started/organization.md
+      - Setup: getting_started/setup.md
+      - Usage: getting_started/usage.md
+  - Product:
+      - Overview: product/index.md
+      # - Features: product/features.md
+      # - Use Cases: product/use_cases.md
+      # - Examples: product/examples.md
+      # - FAQ: product/faq.md
+  - Development:
+      - Development Home: development/index.md
+      - Design: development/design.md
+      - Todo: development/todo.md
+      - Brian:
+          - Brian's Bio: development/brian/index.md
+  - Concepts:
+      - Main Concepts: concepts/index.md
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - tables
+plugins:
+  - search
+  - social
+extra_css:
+  - stylesheets/extra.css

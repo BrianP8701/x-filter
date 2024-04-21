@@ -5,7 +5,7 @@ your_x_filter_user_id = 1781356046893854720
 
 def test_get_user_id():
     wrapper = XWrapper()
-    username = "your_x_filter"
+    username = "BrianPrzezdzie2"
     user_id = wrapper.get_user_id(username)
     print(f"User ID for @{username}: {user_id}")
 
@@ -47,5 +47,6 @@ def test_send_tweet():
     response = wrapper.post_tweet(user_id, tweet)
     print(response)
     
-test_send_tweet()
+test_get_user_id()
+
 

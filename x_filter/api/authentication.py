@@ -13,27 +13,35 @@ from x_filter.utils.conversational import initialize_filter_chat
 router = APIRouter()
 db = Database()
 
-class User(BaseModel):
+class UserRoute(BaseModel):
     id: str
     password: str
     x_username: str
 
 @router.post("/api/signup/")
-def signup(user: User):
+def signup(data: UserRoute):
+    user = User(id=data.id, password=data.password, x_username=data.x_username, filters={})
     if db.exists("users", user.id):
         return {"message": "User already exists.", "status_code": 400}
 
-    hashed_password = hash_password(user.password)
-    db.insert("users", {"id": user.id, "password": hashed_password, "x_username": user.x_username, "filters": {}})
+    hashed_password = hash_password(data.user.password)
+    user = User(id=data.user.id, password=hashed_password, x_username=data.user.x_username, filters={})
+    db.insert("users", user.model_dump())
 
-    access_token, refresh_token = generate_tokens(user.id)
+    access_token, refresh_token = generate_tokens(data.user.id)
 
-    initialize_filter_chat(user.id)
+    initialize_filter_chat(data.user.id)
 
+    conversation = db.query("conversations", data.user.id)
+    
+    user.id = user.id
+    user = user.model_dump()
+    user.pop("password")
     return {
         "access_token": access_token, 
         "refresh_token": refresh_token, 
-        "user": user
+        "user": user,
+        "conversation": conversation 
     }
 
 class SigninUser(BaseModel):
@@ -53,10 +61,12 @@ def signin(user: SigninUser):
     user_data["id"] = user_data["id"]
 
     access_token, refresh_token = generate_tokens(user.id)
+    conversation = db.query("conversations", user.id)
     return {
         "access_token": access_token, 
         "refresh_token": refresh_token, 
-        "user": user_data
+        "user": user_data,
+        "conversation": conversation
     }
 
 @router.post("/api/secure-endpoint/")

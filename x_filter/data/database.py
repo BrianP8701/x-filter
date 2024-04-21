@@ -159,7 +159,7 @@ class SQLiteKeyValueStore(Database):
             result['id'] = data_id
             return result
         else:
-            raise KeyError(f"No data found for ID: {data_id}")
+            raise KeyError(f"No data found for ID: {data_id} in table: {table_name}")
 
     def exists(self, table_name: str, id: str) -> bool:
         self.cursor.execute(

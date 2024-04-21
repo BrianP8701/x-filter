@@ -5,10 +5,10 @@ from x_filter.x.wrapper import XWrapper
 xwrapper = XWrapper()
 db = Database()
 
-def run_x_filter(filter_id: str):
+async def run_x_filter(filter_id: str):
     filter = Filter(**db.query("filters", filter_id))
-    
-    
+
+
     tweets = xwrapper.search_tweets_with_filter(filter)
     specific_user_tweets = []
     for username in filter.usernames:

@@ -22,7 +22,7 @@ class Instructor:
         self,
         messages: List[Dict[str, str]],
         instructor_model: Type[BaseModel],
-        max_retries: int = 3,
+        max_retries: int = 8,
     ) -> Type[BaseModel]:
         """
         Most of you are likely familiar with tool calling with GPT4.

@@ -15,8 +15,7 @@ class ExtractedFilters(BaseModel): # We build this based off of the filter_promp
     only_search_specified_usernames: Optional[bool] = False
     only_search_followers: Optional[bool] = False
     
-    tweet_cap: Optional[int] = 100
-    user_cap: Optional[int] = 20
+    return_cap: Optional[int] = 20
     
     keyword_groups: Optional[List[List[str]]] = None
 
@@ -35,7 +34,7 @@ class Filter (BaseModel):
     usernames: List[str] = [] # Specific usernames to search for
     only_search_specified_usernames: bool = False
     only_search_followers: bool = False
-    report_cap: int = 100
+    return_cap: int = 20
     keyword_groups: List[List[str]] = []
     messages: List[Dict[str, str]] = []
 

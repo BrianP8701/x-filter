@@ -42,6 +42,7 @@ ask_for_primary_prompt_for_tweets = """Great! Now that we've established the tar
 class Stage2(BaseModel):
     rewritten_primary_prompt: Optional[str]
     questions: Optional[str]
+    name: Optional[str]
     
     def __str__(self):
         return f"rewritten_primary_prompt: {self.rewritten_primary_prompt}\nquestions: {self.questions}"
@@ -50,7 +51,9 @@ stage2_system_prompt = """At this stage we want to build a comprehensive "primar
 
 1. **Clarify the Search**: If the user's request is unclear, ask questions in the 'questions' field to better understand what they want. If there's acronyms or things that you don't aren't familiar about ask them detailed questions about it. Record these questions in the 'questions' field. Skip this step if the user's intent is already clear. If the user wants reports, clarify that at this stage we're only talking about what types of tweets you want to search for.
 
-2. **Write the Primary Prompt**: If you don't have any further questions to ask, write the primary prompt in the 'rewritten_primary_prompt' field. Try to include everything the user talked about and wanted in this prompt. It's crucial that this is as comprehensive as humanlly possible."""
+2. **Write the Primary Prompt**: If you don't have any further questions to ask, write the primary prompt in the 'rewritten_primary_prompt' field. Try to include everything the user talked about and wanted in this prompt. It's crucial that this is as comprehensive as humanlly possible.
+
+Lastly, when you do write the primary prompt, try to come up with a good and short 1-3 word name for this filter."""
 
 class Stage3(BaseModel):
     additional_filters: Optional[str]
@@ -104,13 +107,12 @@ class ExtractedFilters(BaseModel):
     """
     Extract filters from the filter_prompt into the filter object
     """
-    filter_period: Optional[int] = Field(None, description="Did the user specify how often they want the filter to runs? Fil in this field in days.")
+    filter_period: Optional[int] = Field(None, description="Did the user specify how often they want the filter to runs? Fill in this field in days.")
     usernames: Optional[List[str]] = Field(None, description="Did the user mention any specific usernames to search for?")
     only_search_specified_usernames: Optional[bool] = Field(None, description="Did the user ask to only search for the specific usernames they mentioned?")
     only_search_followers: Optional[bool] = Field(None, description="Did the user ask to only search for the people they follow?")
+    return_cap: Optional[int] = Field(None, description="Did the user ask to limit the number of tweets/users they want to see in each report? If so fill in this field.")
     keyword_groups: Optional[List[List[str]]] = Field(None, description="Did the user provide any keyword groups to search for?")
-    
-    return_cap: Optional[int] = Field(None, description="Did the user ask to limit the number of tweets/users they want to see in each report?")
     
     def __str__(self):
         return f"filter_period: {self.filter_period}, usernames: {self.usernames}, only_search_specified_usernames: {self.only_search_specified_usernames}, only_search_followers: {self.only_search_followers}, return_cap: {self.return_cap}"

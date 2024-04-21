@@ -5,12 +5,10 @@ import logging
 from x_filter import Database
 from x_filter.data.models.conversation import Conversation
 from x_filter.data.models.filter import Filter
-from x_filter.websocket import WebsocketManager
-
+from x_filter.ai.workflows.guided_convo import first_message
 load_dotenv()
 INTERFACE_MODE = os.getenv("INTERFACE_MODE")
 
-websocket_manager = WebsocketManager()
 db = Database()
 
 def initialize_filter_chat(user_id: str):
@@ -20,7 +18,7 @@ def initialize_filter_chat(user_id: str):
     else:
         db.insert("filters", filter.model_dump())
 
-    conversation = Conversation(id=user_id, user_id=user_id, messages=[], stage=1)
+    conversation = Conversation(id=user_id, user_id=user_id, stage=1, messages=[{"role": "assistant", "content": first_message}])
     if db.exists("conversations", user_id):
         db.update("conversations", conversation.model_dump())
     else: 
@@ -34,34 +32,6 @@ def add_message_to_conversation(conversation: Conversation, role: str, content: 
     }
     conversation.messages.append(new_message)
     db.update("conversations", conversation.model_dump())
-
-def send_chat_message_to_user(conversation: Conversation, message: str, cache_message=True):
-    """ Send a message to the user. For now, we'll just print it. """
-    if cache_message:
-        add_message_to_conversation(conversation, "assistant", message)
-
-    if INTERFACE_MODE == "cli":
-        with open('input.txt', 'a') as file:
-            file.write("\n\nBot:\n" + message + "\n\n" + "User:\n")
-        logging.info(f"Message sent to user: {message}")
-    elif INTERFACE_MODE == "local":
-        websocket_manager.send_chat_message_to_user(conversation.user_id, message)
-    else:
-        print("We only support the CLI interface at the moment.")
-
-def send_filter_message_to_user(conversation: Conversation, filter_id: str, message: str, cache_message=True):
-    """ Send a message to the user. For now, we'll just print it. """
-    if cache_message:
-        add_message_to_conversation(conversation, "assistant", message)
-
-    if INTERFACE_MODE == "cli":
-        with open('input.txt', 'a') as file:
-            file.write("\n\nBot:\n" + message + "\n\n" + "User:\n")
-        logging.info(f"Message sent to user: {message}")
-    elif INTERFACE_MODE == "local":
-        websocket_manager.send_filter_message_to_user(conversation.user_id, filter_id, message)
-    else:
-        print("We only support the CLI interface at the moment.")
 
 def clear_cached_conversation_messages(conversation: Conversation):
     conversation.messages = []
