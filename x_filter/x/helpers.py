@@ -1,8 +1,11 @@
 from typing import List, Optional
+from datetime import datetime, timedelta
+
+from x_filter.data.models.filter import Filter
 
 twitter_url = "https://api.twitter.com/2/"
 
-def build_combined_query(keyword_groups, exclude_replies: bool = True):
+def build_combined_query(filter: Filter, exclude_replies: bool = True):
     """
     Constructs a Twitter search query string from a list of keyword groups. Each group is combined using 'AND',
     and each resulting group string is then combined with 'OR' between them. Ensures correct formatting to avoid ambiguity.
@@ -13,8 +16,12 @@ def build_combined_query(keyword_groups, exclude_replies: bool = True):
     Returns:
         str: A combined query string integrating both 'AND' and 'OR' conditions, formatted for Twitter API requirements.
     """
+    keyword_groups = filter.keyword_groups
     combined_queries = []
-    
+
+    # Filter out empty or whitespace-only keyword groups before processing
+    keyword_groups = [group for group in keyword_groups if group and any(keyword.strip() for keyword in group)]
+
     for keywords in keyword_groups:
         # Enclose keywords in quotes only if they contain spaces
         quoted_keywords = [f'"{keyword}"' if ' ' in keyword else keyword for keyword in keywords]
@@ -22,16 +29,26 @@ def build_combined_query(keyword_groups, exclude_replies: bool = True):
         and_query = ' '.join(quoted_keywords)
         # Enclose each and_query in parentheses to ensure proper grouping
         combined_queries.append(f"({and_query})")
-    
-    # Join all group queries with ' OR ', ensuring correct spacing
+
+    # Initially attempt to include all keyword groups
     final_query = ' OR '.join(combined_queries)
-    
+
     if exclude_replies:
         final_query += " -is:reply"
-    
+
+    # Check if the final query exceeds the Twitter API limit of 512 characters
+    while len(final_query) > 512:
+        # If so, remove the last keyword group and reconstruct the query
+        if combined_queries:
+            combined_queries.pop()  # Remove the last group
+            final_query = ' OR '.join(combined_queries)
+            if exclude_replies:
+                final_query += " -is:reply"
+        else:
+            # If all groups are removed and it's still too long, break to avoid infinite loop
+            break
+
     return final_query
-
-
 
 
 def concat_fields(fields: List[any]):

@@ -24,7 +24,7 @@ print(f"Access Token: {auth.access_token}")
 print(f"Access Token Secret: {auth.access_token_secret}")
 
 # Step 5: Set up the API client
-api = tweepy.API(auth)
+api = tweepy.Client(auth)
 
 # Step 6: Create a tweet
 status = "Hello, world! Tweeting from Tweepy and Python."

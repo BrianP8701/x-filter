@@ -132,7 +132,7 @@ class SQLiteKeyValueStore(Database):
         self.connection.commit()
 
     def update(self, table_name: str, data: Dict) -> None:
-        data_id = data.pop('id')
+        data_id = data['id']
         serialized_data = json.dumps(data)
         self.cursor.execute(
             f"UPDATE {table_name} SET data = ? WHERE id = ?",

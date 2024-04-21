@@ -1,5 +1,6 @@
 from x_filter.x.wrapper import XWrapper
 from x_filter.x.helpers import create_url_tweets, create_url_users, build_combined_query
+from x_filter.data.models.filter import Filter
 
 your_x_filter_user_id = 1781356046893854720
 
@@ -30,12 +31,15 @@ def get_tweet_author_id():
 def test_search_tweets_with_params():
     wrapper = XWrapper()
     keyword_groups = [["RAG", "new methods"], ["RAG", "vector databases"], ["state of the art", "LLM navigation"], ["file structure, RAG"]]
-    start_time = "2024-04-13T00:00:00Z"
+    filter = Filter(
+        id="1",
+        user_id="123",
+        name="RAG Research",
+        keyword_groups=keyword_groups,
+        filter_period=14
+    )
 
-    tweet_fields = ["text"]
-    user_fields = ["id", "username"]
-
-    tweets = wrapper.search_tweets(keyword_groups=keyword_groups, start_time=start_time, tweet_fields=tweet_fields, user_fields=user_fields)
+    tweets = wrapper.search_tweets(filter)
     print(tweets)
     print(len(tweets))
 
@@ -47,6 +51,6 @@ def test_send_tweet():
     response = wrapper.post_tweet(user_id, tweet)
     print(response)
     
-test_get_user_id()
+test_search_tweets_with_params()
 
 

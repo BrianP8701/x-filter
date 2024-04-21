@@ -168,6 +168,7 @@ async def build_report_guide(conversation: Conversation, event: MessageEvent, fi
         new_filter_id = generate_uuid()
         conversation.id = new_filter_id
         filter.id = new_filter_id
+        filter.messages = conversation.messages
         user = db.query("users", event.user_id)
         user["filters"][new_filter_id] = filter.name 
         db.update("users", user)
@@ -215,8 +216,16 @@ async def build_filter(filter: Filter): # Extract filters from the prompts
     ]
     
     model: ExtractedFilters = await instructor.completion(messages, ExtractedFilters)
-    extracted_filters: Filter = extract_filters(model, filter)
-    db.update("filters", extracted_filters.model_dump())
+    if model.return_cap:
+        filter.return_cap = model.return_cap
+    if model.filter_period:
+        filter.filter_period = model.filter_period
+    if model.usernames:
+        filter.usernames = model.usernames
+    if model.only_search_specified_usernames:
+        filter.only_search_specified_usernames = model.only_search_specified_usernames
+    
+    db.update("filters", filter.model_dump())
 
     messages = [
         {
@@ -233,4 +242,4 @@ async def build_filter(filter: Filter): # Extract filters from the prompts
     filter.keyword_groups = combine_keyword_groups(filter.keyword_groups, model.keyword_groups)
     db.update("filters", filter.model_dump())
 
-    await run_x_filter(filter.id)
+    await run_x_filter(filter.id, first_cap=30)

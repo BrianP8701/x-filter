@@ -24,15 +24,15 @@ def signup(data: UserRoute):
     if db.exists("users", user.id):
         return {"message": "User already exists.", "status_code": 400}
 
-    hashed_password = hash_password(data.user.password)
-    user = User(id=data.user.id, password=hashed_password, x_username=data.user.x_username, filters={})
+    hashed_password = hash_password(data.password)
+    user = User(id=data.id, password=hashed_password, x_username=data.x_username, filters={})
     db.insert("users", user.model_dump())
 
-    access_token, refresh_token = generate_tokens(data.user.id)
+    access_token, refresh_token = generate_tokens(data.id)
 
-    initialize_filter_chat(data.user.id)
+    initialize_filter_chat(data.id)
 
-    conversation = db.query("conversations", data.user.id)
+    conversation = db.query("conversations", data.id)
     
     user.id = user.id
     user = user.model_dump()
