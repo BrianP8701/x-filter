@@ -49,6 +49,21 @@ class TwitterClient:
         follower_ids = [user.id for user in data.data]
         return follower_ids
 
+    async def search_recent_tweets(self, keywords: List[str], max_results: int):
+        query = " ".join(keywords)  # ANDing keywords together
+        tweets = []
+        try:
+            # Fetch tweets using the paginator
+            paginator = tweepy.Paginator(self.client.search_recent_tweets, query=query, tweet_fields=['id', 'text'], expansions="author_id", max_results=max_results)
+            for tweet in paginator.flatten(limit=max_results):
+                # Fetch username for each tweet's author_id
+                username = self.get_username(tweet.author_id)
+                tweets.append({"id": tweet.id, "text": tweet.text, "username": username})
+        except Exception as e:
+            logging.error(f"Error searching tweets: {e}")
+        return tweets
+        
+
     def search_tweets(self, filter: Filter):
         """ Returns a list of tweets (id, text, username) that match the specified query. """
         query = build_combined_query(filter)
@@ -145,20 +160,11 @@ class TwitterClient:
 # Usage
 if __name__ == "__main__":
     twitter_client = TwitterClient()
-    user_ids = [1772640376102211584, 1779490387909824512, 1771033807321169920, 1770762198656131072, 1638392013623001088, 1678434052003512320]
-    usernames = []
     
-    for user_id in user_ids:
-        usernames.append(twitter_client.get_username(user_id))
-        
-    print(usernames)
-    # my_id = twitter_client.get_user_id('BrianPrzezdzie2')
-    # follower_count = twitter_client.get_user_followers_count(my_id)
-    # following_count = twitter_client.get_user_following_count(my_id)
-
-    # print(f"User ID: {my_id}")
-    # print(f"Followers: {follower_count}")
-    # print(f"Following: {following_count}")
+    
+    tweets = twitter_client.search_recent_tweets(keywords=['python', 'java'], max_results=10)
+    print(tweets)
+    pass
 
 
 # data = twitter_client.get_user_tweets(usernames=['BrianPrzezdzie2'])

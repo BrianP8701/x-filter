@@ -11,96 +11,76 @@ instructor = Instructor()
 xwrapper = TwitterClient()
 db = Database()
 
-async def run_x_filter(filter_id: str):
-    results_to_return = []
-    
+async def run_x_filter(filter_id: str):    
     filter = Filter(**db.query("filters", filter_id))
 
-    tweets = []
+    min = filter.return_min
+    max = filter.return_cap
+    gathered_tweets = []    
+    previous_keyword_groups = []
 
-    if not filter.only_search_specified_usernames:
-        while True:
-            tweets = xwrapper.search_tweets(filter)
-            filter = Filter(**db.query("filters", filter_id))
-            if len(tweets) < 30:
-                filter = await broaden_query(filter)
-            else:
-                break
+    retry = 50
+    c_try = 0
 
-    try:
-        if filter.usernames is not None and len(filter.usernames) > 0:
-            filter_period = filter.filter_period
-            days = filter_period if filter_period else 6
-            days = min(days, 6)
-            specific_user_tweets = xwrapper.get_user_tweets(filter.usernames, days=days)
-            tweets += specific_user_tweets
-    except:
-        pass
+    first_keywords = await most_likely_keyword_group(filter, previous_keyword_groups)
+    num_of_keywords = len(first_keywords)
 
-    # first_cap = filter.return_cap * 10
+    while len(gathered_tweets) < min:
+        keywords = await most_likely_keyword_group(filter, previous_keyword_groups, num_of_keywords)
+        if c_try > retry:
+            break
+        filter.messages.append({
+            "role": "assistant",
+            "content": f"Searching with keywords: {keywords}"
+        })
+        db.update("filters", filter.model_dump())
+        previous_keyword_groups.append(keywords)
+        max_results = max - len(gathered_tweets)
+        tweets = await xwrapper.search_recent_tweets(keywords, max_results=max_results)
+        for tweet in tweets:
+            is_valid = await x_filter_validate(tweet["text"], filter)
+            if is_valid:
+                gathered_tweets.append(tweet)
+                filter.messages.append({
+                    "role": "assistant",
+                    "content": f"Found tweet: {tweet['text']}"
+                })
+        filter.messages.append({
+            "role": "assistant",
+            "content": f"Found {len(tweets)} tweets with keywords: {keywords}"
+        })
+        db.update("filters", filter.model_dump())
+        gathered_tweets += tweets
+        if c_try % 5 == 0:
+            num_of_keywords -= 1
+            if num_of_keywords < 2: 
+                num_of_keywords = 2
+        if len(gathered_tweets) >= max:
+            break
+        c_try += 1
 
-    # if len(tweets) > first_cap:
-    #     tweets = sample(tweets, first_cap)
+    tweet_results = sample(gathered_tweets, min)
 
-    print(f"Found {len(tweets)} tweets when using the primary prompt.")
-
-    # Concurrently validate tweets
-    validation_results = await asyncio.gather(*(x_filter_validate(tweet["text"], filter) for tweet in tweets))
-    print(f"Validation results: {validation_results}")
-    # Filter out only the valid tweets
-    valid_tweets = [tweet for tweet, valid in zip(tweets, validation_results) if valid]
-
-    print(f"Found {len(valid_tweets)} valid tweets when using the primary prompt.")
-    for tweet in valid_tweets:
+    for tweet in tweet_results:
         filter.messages.append({
             "role": "assistant",
             "content": f"@{tweet['username']}: {tweet['text']}"
         })
     db.update("filters", filter.model_dump())
-    filter = Filter(**db.query("filters", filter_id))
-    filter.messages.append({
-        "role": "assistant",
-        "content": f"Found {len(valid_tweets)} valid tweets when using the primary prompt."
-    })
-
-    if len(valid_tweets) < filter.return_min:
-        filter.messages.append({
-            "role": "assistant",
-            "content": "Not enough valid tweets, broadening primary prompt"
-        })
-        db.update("filters", filter.model_dump())
-        filter = await broaden_primary_prompt(filter)
-        filter = Filter(**db.query("filters", filter_id))
-        second_validation_results = await asyncio.gather(*(x_filter_validate(tweet["text"], filter) for tweet in tweets))
-        valid_tweets = [tweet for tweet, valid in zip(valid_tweets, second_validation_results) if valid]
-        filter.messages.append({
-            "role": "assistant",
-            "content": f"Found {len(valid_tweets)} valid tweets when using the new primary prompt: {filter.primary_prompt}"
-        })
-
+    
     if filter.target == "reports":
-        # Concurrently create reports for valid tweets
-        reports = await asyncio.gather(*(create_tweet_report(tweet["text"], filter) for tweet in valid_tweets))
-        results_to_return.extend(reports)
-    else:
-        results_to_return.extend([f"@{tweet['username']}: {tweet['text']}\n\n" for tweet in valid_tweets])
-
-    return_cap = filter.return_cap
-    if return_cap and len(results_to_return) > return_cap:
-        results_to_return = sample(results_to_return, return_cap)
-
-    results_to_return_as_string = "\n\n\n".join(results_to_return)
-
-    filter.messages.append({
-        "role": "assistant",
-        "content": f"Here are the results for your filter '{filter.name}':\n\n{results_to_return_as_string}"
-    })
-    with open("results.md", "w") as results_file:
-        results_file.write(results_to_return_as_string)
-    db.update("filters", filter.model_dump())
+        for tweet in tweet_results:
+            report = await create_tweet_report(tweet["text"], filter)
+            filter.messages.append({
+                "role": "assistant",
+                "content": f"Report for tweet: {report}"
+            })
+        db.update("filters", filter.model_dump())
+    
+        
 
 class ValidateTweet(BaseModel):
-    valid: bool = Field(..., description="Whether the user would want this tweet.")
+    valid: bool = Field(..., description="Whether the user would want this tweet. Don't be too strict.")
 
 async def x_filter_validate(tweet_text: str, filter: Filter) -> bool:
     messages = [
@@ -110,7 +90,7 @@ async def x_filter_validate(tweet_text: str, filter: Filter) -> bool:
         },
         {
             "role": "user",
-            "content": f"Tweet: {tweet_text}\n\nFilter: {filter.primary_prompt}"
+            "content": f"Tweet: {tweet_text}\n\nFilter prompt: {filter.primary_prompt}"
         }
     ]
 
@@ -147,12 +127,16 @@ async def broaden_query(filter: Filter):
         },
         {
             "role": "user",
-            "content": f"The user is looking for stuff that matches this: {filter.primary_prompt}\n\nCurrent keyword groups: {keyword_groups}\n\nPlease provide a new keyword group."
+            "content": f"The user is looking for stuff that matches this: {filter.primary_prompt}\n\nCurrent keyword groups: {keyword_groups}\n\nPlease provide a new keyword group that is more general than the current one."
         }
     ]
-    
+
     new_keyword_group: MakeNewKeywordGroup = await instructor.completion(messages, MakeNewKeywordGroup)
     filter.keyword_groups = new_keyword_group.keyword_groups
+    filter.messages.append({
+        "role": "assistant",
+        "content": f"Updated keyword groups to be more general: {filter.keyword_groups}"
+    })
     db.update("filters", filter.model_dump())
     return filter
 
@@ -174,3 +158,27 @@ async def broaden_primary_prompt(filter: Filter):
     filter.primary_prompt = new_primary_prompt.primary_prompt
     db.update("filters", filter.model_dump())
     return filter
+
+
+
+
+class MostLikelyKeywordGroup(BaseModel):
+    keywords: List[str] = Field(..., description="All the keywords in here are queryed together with the 'AND' operator.")
+base_system_prompt = "Reflecting on the user's specific interests, identify the most precise keyword group (comprising single-word keywords) that has not yet been utilized. This process will be repeated iteratively to achieve the optimal number of keywords. It's important to note that the user's primary prompt might not explicitly include the keywords needed for the search. Employ strategic thinking to deduce the most relevant keywords that align with the user's search intent. If pinpointing specific keywords proves challenging, opt for broader, more general keywords to ensure relevancy. Please, use simple words."
+async def most_likely_keyword_group(filter: Filter, previous_keyword_groups: List[List[str]], num_of_keywords=None):
+    system_prompt = base_system_prompt
+    if num_of_keywords is not None:
+        system_prompt += f"\n\nYou MUST come up with {num_of_keywords} keywords. This is a MUST."
+    messages = [
+        {
+            "role": "system",
+            "content": system_prompt
+        },
+        {
+            "role": "user",
+            "content": f"User's search interest: {filter.primary_prompt}\n\nPrevious keyword groups: {previous_keyword_groups}"
+        }
+    ]
+
+    keyword_group: MostLikelyKeywordGroup = await instructor.completion(messages, MostLikelyKeywordGroup)
+    return keyword_group.keywords
